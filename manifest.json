@@ -4,6 +4,6 @@
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Syntax highlighting and control character visualization for Japanese novel writing.",
-	"author": "kokubo",
+	"author": "satoshikokubo",
 	"isDesktopOnly": false
 }

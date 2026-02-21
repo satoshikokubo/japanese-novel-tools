@@ -3,7 +3,7 @@
 	"name": "Japanese Novel Tools",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "日本語小説執筆支援：制御文字の可視化・セリフおよびルビのシンタックスハイライト",
+	"description": "Syntax highlighting and control character visualization for Japanese novel writing.",
 	"author": "kokubo",
 	"isDesktopOnly": false
 }

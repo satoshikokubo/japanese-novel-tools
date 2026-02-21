@@ -1,8 +1,8 @@
-/*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
+.novel-tools-fullwidth-space {
+	opacity: 0.35;
+	font-size: 0.8em;
+}
+.novel-tools-newline {
+	opacity: 0.35;
+	font-size: 0.8em;
+}

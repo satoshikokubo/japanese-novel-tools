@@ -1,90 +1,89 @@
-# Obsidian Sample Plugin
+# Japanese Novel Tools
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An [Obsidian](https://obsidian.md) plugin for Japanese novel writers.  
+日本語小説執筆者向けのObsidianプラグインです。
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+---
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Features / 機能
 
-## First time developing plugins?
+### Control character visualization / 制御文字の可視化
+- Full-width spaces (　) are displayed as `□` in the editor
+- Line breaks are displayed as `↵` in the editor
+- Visible only in editing mode — does not affect the actual text
 
-Quick starting guide for new plugin devs:
+### Syntax highlighting / シンタックスハイライト
+Color-coding in the editor for:
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+| Syntax | Description | Default color |
+|--------|-------------|---------------|
+| `「」` | Dialogue (single) | Green |
+| `『』` | Dialogue (double) | Yellow-green |
+| `漢字《ルビ》` `｜text《ルビ》` | Ruby / furigana | Blue |
+| `（）` `()` | Parentheses | Red |
 
-## Releasing new releases
+- Ruby notation supports both `漢字《よみ》` (kanji-only auto-detection) and `｜text《よみ》` (pipe prefix)
+- When ruby or parentheses appear inside dialogue brackets, they take priority and are colored correctly
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### Preview highlighting / プレビューのハイライト（オプション）
+Optionally apply the same color-coding to the reading preview.
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### Layout settings / レイアウト設定
 
-## Adding your plugin to the community plugin list
+**Editor:**
+- Adjustable line width for horizontal writing (px)
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+**Preview:**
+- Vertical writing (縦書き) mode with adjustable height (vh)
+- Adjustable line width for horizontal writing (px)
+- Intuitive mouse wheel scrolling in vertical mode (up = scroll right, down = scroll left)
 
-## How to use
+---
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+## Installation / インストール
 
-## Manually installing the plugin
+### From Community Plugins / コミュニティプラグインから
+1. Open Obsidian **Settings → Community plugins**
+2. Disable **Safe mode** if prompted
+3. Select **Browse** and search for `Japanese Novel Tools`
+4. Select **Install**, then **Enable**
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+### Manual installation / 手動インストール
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/kokubo/japanese-novel-tools/releases/latest)
+2. Copy the files to your vault: `<Vault>/.obsidian/plugins/japanese-novel-tools/`
+3. Reload Obsidian and enable the plugin under **Settings → Community plugins**
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+---
 
-## Funding URL
+## Settings / 設定
 
-You can include funding URLs where people who use your plugin can financially support it.
+Open **Settings → Japanese Novel Tools** to configure:
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+- **Highlight features**: Toggle each syntax highlight individually
+- **Colors**: Customize colors for each syntax type
+- **Editor settings**: Line width for horizontal writing
+- **Preview settings**: Toggle vertical writing, adjust height and line width
+- **Mouse wheel**: Toggle intuitive wheel scrolling in vertical preview mode
+- **Debug**: Show colored borders around layout areas for troubleshooting
+- **Reset**: Restore all settings to defaults
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+---
 
-If you have multiple URLs, you can also do:
+## Notes / 注意事項
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+- Syntax highlighting applies to the **editor (Live Preview / Source mode)** only, unless preview highlighting is enabled in settings
+- The mouse wheel intercept applies only when vertical preview mode is ON
+- If mouse wheel behavior conflicts with other scroll-related plugins, disable it in settings
 
-## API Documentation
+---
 
-See https://docs.obsidian.md
+## Compatibility / 動作環境
+
+- Obsidian v0.15.0 or later
+- Desktop and mobile
+
+---
+
+## License / ライセンス
+
+[0-BSD](LICENSE)

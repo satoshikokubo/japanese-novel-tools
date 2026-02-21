@@ -304,7 +304,10 @@ function applyLayout(settings: NovelToolsSettings) {
 	}
 
 	// ===== 編集画面（横書き横幅のみ）=====
-	css.push(`body { --file-line-width: ${settings.editorLineWidth}px; }`);
+	// .cm-editorに限定してbodyを汚染しない
+	css.push(
+		`.cm-editor { --file-line-width: ${settings.editorLineWidth}px; }`,
+	);
 
 	// ===== プレビュー画面 =====
 	if (settings.enableVerticalPreview) {
@@ -337,11 +340,10 @@ function applyLayout(settings: NovelToolsSettings) {
 			}
 		`);
 	} else {
-		// プレビュー：横書き幅
+		// プレビュー：横書き幅（.markdown-preview-viewに限定）
 		css.push(
 			`.markdown-preview-view { --file-line-width: ${settings.previewLineWidth}px; }`,
 		);
-		css.push(`body { --file-line-width: ${settings.previewLineWidth}px; }`);
 	}
 
 	el.textContent = css.join("\n");

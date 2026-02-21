@@ -1,6 +1,6 @@
 {
 	"name": "japanese-novel-tools",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "日本語小説執筆支援プラグイン",
 	"main": "main.js",
 	"type": "module",

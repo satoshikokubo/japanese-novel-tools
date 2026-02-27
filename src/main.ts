@@ -276,7 +276,7 @@ function buildDecos(
 			addKakko(
 				text,
 				from,
-				/\[[^\[\]\n]*\]/g,
+				/\[[^[\]\n]*\]/g,
 				"novel-tools-kakko7",
 				highPriority,
 				entries,
@@ -782,7 +782,7 @@ function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 
 		// 何も対象文字が無ければスキップ（パフォーマンス）
 		if (
-			!/[「『《（(【〔〈"'［\[]/.test(text) &&
+			!/[「『《（(【〔〈"'［[]/.test(text) &&
 			container.querySelectorAll("ruby").length === 0
 		)
 			return;
@@ -847,7 +847,7 @@ function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 		}
 		if (settings.enableKakko7) {
 			addMatches(/［[^［］\n]*］/g, "novel-tools-kakko7", 1);
-			addMatches(/\[[^\[\]\n]*\]/g, "novel-tools-kakko7", 1);
+			addMatches(/\[[^[\]\n]*\]/g, "novel-tools-kakko7", 1);
 		}
 		if (settings.enableKakko8) {
 			addMatches(/‘[^‘’\n]*’/g, "novel-tools-kakko8", 1);
@@ -1060,7 +1060,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			);
 		new Setting(containerEl)
 			.setName("縦書き時の列間（em）")
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc(
 				"縦書きON時のみ使用されます。段落間（列と列の間）の広さを調整します。テーマによって見え方が異なります。",
 			)
@@ -1076,7 +1075,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			);
 		new Setting(containerEl)
 			.setName("縦書き時にメタデータ（プロパティ）を非表示")
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc(
 				"縦書きON時、ノート冒頭のプロパティ（tags等）を非表示にします。縦書きではレイアウトが崩れるため、デフォルトONです。",
 			)
@@ -1225,9 +1223,11 @@ export default class JapaneseNovelTools extends Plugin {
 		updateStatusBar();
 		this.updateStatusBar = updateStatusBar;
 
-		statusBarItem.addEventListener("click", async () => {
-			this.settings.enableVerticalPreview = !this.settings.enableVerticalPreview;
-			await this.saveAndRefresh();
+		statusBarItem.addEventListener("click", () => {
+			void (async () => {
+				this.settings.enableVerticalPreview = !this.settings.enableVerticalPreview;
+				await this.saveAndRefresh();
+			})();
 		});
 
 		// ===== コマンドパレット + ホットキー登録 =====
@@ -1408,7 +1408,7 @@ export default class JapaneseNovelTools extends Plugin {
 						};
 
 						// 実処理（async）
-						fileTextPromise.then((fileText) => {
+						void fileTextPromise.then((fileText) => {
 							const lines = fileText.split(/\r?\n/);
 
 							// ★重要：縦書きは .markdown-preview-section > div を「列」として並べ、

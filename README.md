@@ -21,9 +21,15 @@ Color-coding in the editor for:
 | `『』` | Dialogue (double) | Yellow-green |
 | `漢字《ルビ》` `｜text《ルビ》` | Ruby / furigana | Blue |
 | `（）` `()` | Parentheses | Red |
+| `【】` | Bold brackets | Orange |
+| `〔〕` | Square brackets (annotation) | Purple |
+| `〈〉` | Angle brackets | Cyan |
+| `""` `""` | Double quotes | Yellow |
+| `［］` `[]` | Square brackets | Light orange |
+| `''` `''` | Single quotes | Lime |
 
-- Ruby notation supports both `漢字《よみ》` (kanji-only auto-detection) and `｜text《よみ》` (pipe prefix)
-- When ruby or parentheses appear inside dialogue brackets, they take priority and are colored correctly
+- Ruby notation supports both `漢字《よみ》` (kanji-only) and `｜text《よみ》` (pipe prefix)
+- When symbols overlap (e.g. quotes inside dialogue), inner symbols take priority
 
 ### Preview highlighting / プレビューのハイライト（オプション）
 Optionally apply the same color-coding to the reading preview.
@@ -35,8 +41,14 @@ Optionally apply the same color-coding to the reading preview.
 
 **Preview:**
 - Vertical writing (縦書き) mode with adjustable height (vh)
+- Toggle vertical / horizontal writing from the **status bar button** or **command palette** (hotkey assignable)
 - Adjustable line width for horizontal writing (px)
+- Adjustable column gap in vertical writing (em)
 - Intuitive mouse wheel scrolling in vertical mode (up = scroll right, down = scroll left)
+- Hide frontmatter properties in vertical mode (prevents layout breakage)
+
+### Blank line preservation / 連続空行の保持
+Multiple consecutive blank lines in the source are preserved in preview mode (Markdown normally collapses them).
 
 ---
 
@@ -49,7 +61,7 @@ Optionally apply the same color-coding to the reading preview.
 4. Select **Install**, then **Enable**
 
 ### Manual installation / 手動インストール
-1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/kokubo/japanese-novel-tools/releases/latest)
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/satoshikokubo/japanese-novel-tools/releases/latest)
 2. Copy the files to your vault: `<Vault>/.obsidian/plugins/japanese-novel-tools/`
 3. Reload Obsidian and enable the plugin under **Settings → Community plugins**
 
@@ -62,7 +74,7 @@ Open **Settings → Japanese Novel Tools** to configure:
 - **Highlight features**: Toggle each syntax highlight individually
 - **Colors**: Customize colors for each syntax type
 - **Editor settings**: Line width for horizontal writing
-- **Preview settings**: Toggle vertical writing, adjust height and line width
+- **Preview settings**: Toggle vertical writing, adjust height, line width, and column gap
 - **Mouse wheel**: Toggle intuitive wheel scrolling in vertical preview mode
 - **Debug**: Show colored borders around layout areas for troubleshooting
 - **Reset**: Restore all settings to defaults
@@ -73,7 +85,7 @@ Open **Settings → Japanese Novel Tools** to configure:
 
 - Syntax highlighting applies to the **editor (Live Preview / Source mode)** only, unless preview highlighting is enabled in settings
 - The mouse wheel intercept applies only when vertical preview mode is ON
-- If mouse wheel behavior conflicts with other scroll-related plugins, disable it in settings
+- Half-width brackets `()` and `[]` may appear rotated in vertical writing mode — this is a browser/font limitation; use full-width `（）` `［］` for best results
 
 ---
 

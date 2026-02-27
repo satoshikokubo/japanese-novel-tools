@@ -5,6 +5,7 @@ import {
 	Setting,
 	MarkdownView,
 	MarkdownPostProcessorContext,
+	TFile,
 } from "obsidian";
 import {
 	Decoration,
@@ -24,10 +25,23 @@ const DEFAULT_SETTINGS = {
 	enableKakko2: true,
 	enableRuby: true,
 	enableParen: true,
+	// 追加ハイライト記号
+	enableKakko3: true,   // 【】
+	enableKakko4: true,   // 〔〕
+	enableKakko5: true,   // 〈〉
+	enableKakko6: true,   // "" / “”（ダブルクォート）
+	enableKakko7: true,   // ［］/ []
+	enableKakko8: true,   // '' / ‘’（シングルクォート）
 	colorKakko1: "#7ab87a",
 	colorKakko2: "#a8c87a",
 	colorRuby: "#7aaec8",
 	colorParen: "#c47a7a",
+	colorKakko3: "#c8824a",
+	colorKakko4: "#9b7ac8",
+	colorKakko5: "#7ab8c8",
+	colorKakko6: "#c8b87a",
+	colorKakko7: "#c8a07a",
+	colorKakko8: "#a0c87a",
 	colorControl: "#888888",
 	enablePreviewHighlight: false,
 	// プレビュー改行（小説モード）
@@ -44,6 +58,10 @@ const DEFAULT_SETTINGS = {
 	enableDebugBorderPreview: false,
 	// 縦書き時ホイール操作のインターセプトON
 	enableWheelIntercept: true,
+	// 縦書き時の列間
+	verticalColumnGap: 1.5,
+	// 縦書き時にメタデータ（プロパティ）を非表示
+	hideVerticalMetadata: true,
 };
 
 type NovelToolsSettings = typeof DEFAULT_SETTINGS;
@@ -201,6 +219,87 @@ function buildDecos(
 				highPriority,
 				entries,
 			);
+		if (s.enableKakko3)
+			addKakko(
+				text,
+				from,
+				/【[^【】\n]*】/g,
+				"novel-tools-kakko3",
+				highPriority,
+				entries,
+			);
+		if (s.enableKakko4)
+			addKakko(
+				text,
+				from,
+				/〔[^〔〕\n]*〕/g,
+				"novel-tools-kakko4",
+				highPriority,
+				entries,
+			);
+		if (s.enableKakko5)
+			addKakko(
+				text,
+				from,
+				/〈[^〈〉\n]*〉/g,
+				"novel-tools-kakko5",
+				highPriority,
+				entries,
+			);
+		if (s.enableKakko6) {
+			addKakko(
+				text,
+				from,
+				/“[^“”\n]*”/g,
+				"novel-tools-kakko6",
+				highPriority,
+				entries,
+			);
+			addKakko(
+				text,
+				from,
+				/"[^"\n]*"/g,
+				"novel-tools-kakko6",
+				highPriority,
+				entries,
+			);
+		}
+		if (s.enableKakko7) {
+			addKakko(
+				text,
+				from,
+				/［[^［］\n]*］/g,
+				"novel-tools-kakko7",
+				highPriority,
+				entries,
+			);
+			addKakko(
+				text,
+				from,
+				/\[[^\[\]\n]*\]/g,
+				"novel-tools-kakko7",
+				highPriority,
+				entries,
+			);
+		}
+		if (s.enableKakko8) {
+			addKakko(
+				text,
+				from,
+				/‘[^‘’\n]*’/g,
+				"novel-tools-kakko8",
+				highPriority,
+				entries,
+			);
+			addKakko(
+				text,
+				from,
+				/'[^'\n]*'/g,
+				"novel-tools-kakko8",
+				highPriority,
+				entries,
+			);
+		}
 
 		for (let i = 0; i < text.length; i++) {
 			const char = text[i];
@@ -292,6 +391,12 @@ function applyColors(settings: NovelToolsSettings) {
 		.novel-tools-kakko2 { color: ${settings.colorKakko2} !important; }
 		.novel-tools-ruby   { color: ${settings.colorRuby}   !important; }
 		.novel-tools-paren  { color: ${settings.colorParen}  !important; }
+		.novel-tools-kakko3 { color: ${settings.colorKakko3} !important; }
+		.novel-tools-kakko4 { color: ${settings.colorKakko4} !important; }
+		.novel-tools-kakko5 { color: ${settings.colorKakko5} !important; }
+		.novel-tools-kakko6 { color: ${settings.colorKakko6} !important; }
+		.novel-tools-kakko7 { color: ${settings.colorKakko7} !important; }
+		.novel-tools-kakko8 { color: ${settings.colorKakko8} !important; }
 		.novel-tools-fullwidth-space { color: ${settings.colorControl} !important; opacity: 0.35; font-size: 0.8em; }
 		.novel-tools-newline         { color: ${settings.colorControl} !important; opacity: 0.35; font-size: 0.8em; }
 	`;
@@ -339,6 +444,8 @@ function applyLayout(settings: NovelToolsSettings) {
 	// ===== プレビュー画面 =====
 	if (settings.enableVerticalPreview) {
 		// プレビュー：縦書き
+		// --file-line-width / --line-width を auto にリセットしないと、
+		// Minimal等のテーマで列間が異常に広くなる問題が発生する。
 		css.push(`
 			.markdown-preview-view {
 				writing-mode: vertical-rl !important;
@@ -349,6 +456,11 @@ function applyLayout(settings: NovelToolsSettings) {
 				padding: 16px !important;
 				box-sizing: border-box !important;
 				max-width: none !important;
+				--file-line-width: auto !important;
+				--line-width: auto !important;
+				word-break: break-all !important;
+				font-feature-settings: "vert" !important;
+
 			}
 			.markdown-preview-sizer {
 				min-height: unset !important;
@@ -363,9 +475,31 @@ function applyLayout(settings: NovelToolsSettings) {
 				display: inline-block !important;
 				height: 100% !important;
 				margin: 0 !important;
+				margin-right: ${settings.verticalColumnGap}em !important;
 				vertical-align: top !important;
 			}
+			/* テーマの段落スペーシングを縦書き用にリセット（--p-spacing が列間に化けるのを防ぐ） */
+			.markdown-preview-view {
+				--p-spacing: 0px !important;
+			}
+			.markdown-preview-view p,
+			.markdown-preview-view h1,
+			.markdown-preview-view h2,
+			.markdown-preview-view h3,
+			.markdown-preview-view h4,
+			.markdown-preview-view h5,
+			.markdown-preview-view h6 {
+				margin-block: 0 !important;
+			}
 		`);
+		// メタデータ非表示オプション
+		if (settings.hideVerticalMetadata) {
+			css.push(`
+				.markdown-preview-view .metadata-container {
+					display: none !important;
+				}
+			`);
+		}
 	} else {
 		// プレビュー：横書き幅（.markdown-preview-viewに限定）
 		css.push(
@@ -382,6 +516,48 @@ function applyLayout(settings: NovelToolsSettings) {
 		}
 	`);
 
+	// ===== 連続空行の保持（DOM非挿入 / ギャップ加算方式） =====
+	// Markdownの仕様で「連続空行」は1つに潰れるため、プレビュー側で“余剰分(空行数-1)”だけ
+	// ブロック間ギャップを追加して再現する。
+	//
+	// 単位は行間調整と競合しにくいよう可能なら 1lh を採用（未対応環境は 1em）。
+	// - 横書き: wrapper(div) に margin-block-end を追加
+	// - 縦書き: .markdown-preview-section > div の列間(margin-right)に加算
+	css.push(`
+		.markdown-preview-view { --novel-tools-blank-unit: 1em; }
+		@supports (height: 1lh) {
+			.markdown-preview-view { --novel-tools-blank-unit: 1lh; }
+		}
+			/* 横書きは「次ブロックの手前」に空行を入れるため、padding-block-start を使う */
+			.markdown-preview-view:not(.novel-tools-vertical) .novel-tools-blankpad {
+				padding-block-start: calc(var(--novel-tools-extra-blank-lines, 0) * var(--novel-tools-blank-unit)) !important;
+			}
+		/* 縦書きは「列(div)」の間隔で表現する（空白列をDOM挿入せずに再現） */
+		.markdown-preview-view.novel-tools-vertical .markdown-preview-section > div.novel-tools-blankpad {
+			margin-right: calc(${settings.verticalColumnGap}em + (var(--novel-tools-extra-blank-lines, 0) * var(--novel-tools-blank-unit))) !important;
+		}
+	`);
+	// ===== ステータスバーボタン =====
+	css.push(`
+		.novel-tools-vertical-toggle {
+			cursor: pointer;
+			padding: 0 6px;
+			border-radius: 4px;
+			border: 1px solid transparent;
+			transition: border-color 0.15s, color 0.15s;
+			user-select: none;
+		}
+		.novel-tools-vertical-toggle:hover {
+			border-color: var(--text-muted);
+			background: var(--background-modifier-hover);
+		}
+		.novel-tools-vertical-toggle.is-active {
+			color: var(--color-accent);
+			border-color: var(--color-accent);
+			font-weight: 600;
+		}
+	`);
+
 	// ===== 設定画面：無効項目の視認性 =====
 	css.push(`
 		.novel-tools-setting-disabled { opacity: 0.55; }
@@ -392,21 +568,28 @@ function applyLayout(settings: NovelToolsSettings) {
 	el.textContent = css.join("\n");
 }
 
-// ===== ① プレビューハイライト処理 =====
+// ===== ① 連続空行の保持（プレビューのみ / padding方式） =====
+// Markdownの仕様では複数の連続空行は1つの段落区切りに握りつぶされる。
+// そこでプレビューDOMの各ブロック要素に対して、直前の連続空行数をカウントし、
+// 余剰分(空行数-1)を padding-block-start で表現する（DOMへスペーサー要素は挿入しない）。
+// ===== ② プレビューハイライト処理 =====
 
 function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 	if (!settings.enablePreviewHighlight) return;
 	if (!el.isConnected) return;
 
 	// 既存の自前ハイライトを一度すべて解除（再実行を安全にする）
+	const KAKKO_SPAN_SEL =
+		"span.novel-tools-kakko1, span.novel-tools-kakko2, " +
+		"span.novel-tools-kakko3, span.novel-tools-kakko4, " +
+		"span.novel-tools-kakko5, span.novel-tools-kakko6, " +
+		"span.novel-tools-kakko7, span.novel-tools-kakko8, " +
+		"span.novel-tools-ruby, span.novel-tools-paren";
+
 	const unwrapOwnSpans = (root: HTMLElement) => {
-		root.querySelectorAll(
-			"span.novel-tools-kakko1, span.novel-tools-kakko2, span.novel-tools-ruby, span.novel-tools-paren",
-		).forEach((span) => {
+		root.querySelectorAll(KAKKO_SPAN_SEL).forEach((span) => {
 			span.replaceWith(...Array.from(span.childNodes));
 		});
-
-		// ruby要素に付与したクラスを解除（共存相手の class="ruby" 等は残す）
 		root.querySelectorAll(
 			"ruby.novel-tools-ruby, ruby.novel-tools-kakko1, ruby.novel-tools-kakko2, ruby.novel-tools-paren",
 		).forEach((r) => {
@@ -515,11 +698,7 @@ function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 
 				// 既に自前spanの中（理論上はunwrap済みだが保険）
 				const parent = (node as Text).parentElement;
-				if (
-					parent?.closest(
-						"span.novel-tools-kakko1, span.novel-tools-kakko2, span.novel-tools-ruby, span.novel-tools-paren, code, pre",
-					)
-				)
+				if (parent?.closest(KAKKO_SPAN_SEL + ", code, pre"))
 					return;
 
 				units.push({
@@ -603,7 +782,7 @@ function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 
 		// 何も対象文字が無ければスキップ（パフォーマンス）
 		if (
-			!/[「『《（(]/.test(text) &&
+			!/[「『《（(【〔〈"'［\[]/.test(text) &&
 			container.querySelectorAll("ruby").length === 0
 		)
 			return;
@@ -656,6 +835,24 @@ function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 			addMatches(/「[^「」\n]*」/g, "novel-tools-kakko1", 1);
 		if (settings.enableKakko2)
 			addMatches(/『[^『』\n]*』/g, "novel-tools-kakko2", 1);
+		if (settings.enableKakko3)
+			addMatches(/【[^【】\n]*】/g, "novel-tools-kakko3", 1);
+		if (settings.enableKakko4)
+			addMatches(/〔[^〔〕\n]*〕/g, "novel-tools-kakko4", 1);
+		if (settings.enableKakko5)
+			addMatches(/〈[^〈〉\n]*〉/g, "novel-tools-kakko5", 1);
+		if (settings.enableKakko6) {
+			addMatches(/“[^“”\n]*”/g, "novel-tools-kakko6", 1);
+			addMatches(/"[^"\n]*"/g, "novel-tools-kakko6", 1);
+		}
+		if (settings.enableKakko7) {
+			addMatches(/［[^［］\n]*］/g, "novel-tools-kakko7", 1);
+			addMatches(/\[[^\[\]\n]*\]/g, "novel-tools-kakko7", 1);
+		}
+		if (settings.enableKakko8) {
+			addMatches(/‘[^‘’\n]*’/g, "novel-tools-kakko8", 1);
+			addMatches(/'[^'\n]*'/g, "novel-tools-kakko8", 1);
+		}
 
 		if (matches.length === 0) return;
 
@@ -753,6 +950,12 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			["enableKakko2", "『』のハイライト"],
 			["enableRuby", "《》ルビのハイライト"],
 			["enableParen", "（）カッコのハイライト"],
+			["enableKakko3", "【】のハイライト"],
+			["enableKakko4", "〔〕のハイライト"],
+			["enableKakko5", "〈〉のハイライト"],
+			["enableKakko6", "\"\" / “” ダブルクォートのハイライト"],
+			["enableKakko7", "［］/ [] 角括弧のハイライト"],
+			["enableKakko8", "''  / ‘’ シングルクォートのハイライト"],
 		];
 		for (const [key, name] of toggles) {
 			new Setting(containerEl).setName(name).addToggle((t) =>
@@ -783,6 +986,12 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			["colorKakko2", "『』の色"],
 			["colorRuby", "《》ルビの色"],
 			["colorParen", "（）カッコの色"],
+			["colorKakko3", "【】の色"],
+			["colorKakko4", "〔〕の色"],
+			["colorKakko5", "〈〉の色"],
+			["colorKakko6", "\"\" / “” ダブルクォートの色"],
+			["colorKakko7", "［］/ [] 角括弧の色"],
+			["colorKakko8", "''  / ‘’ シングルクォートの色"],
 			["colorControl", "制御文字（全角スペース/改行）の色"],
 		];
 		for (const [key, name] of colorSettings) {
@@ -846,6 +1055,36 @@ class NovelToolsSettingTab extends PluginSettingTab {
 					.setDynamicTooltip()
 					.onChange(async (v) => {
 						this.plugin.settings.previewLineWidth = v;
+						await this.plugin.saveAndRefresh();
+					}),
+			);
+		new Setting(containerEl)
+			.setName("縦書き時の列間（em）")
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			.setDesc(
+				"縦書きON時のみ使用されます。段落間（列と列の間）の広さを調整します。テーマによって見え方が異なります。",
+			)
+			.addSlider((s) =>
+				s
+					.setLimits(0.0, 5.0, 0.25)
+					.setValue(this.plugin.settings.verticalColumnGap)
+					.setDynamicTooltip()
+					.onChange(async (v) => {
+						this.plugin.settings.verticalColumnGap = v;
+						await this.plugin.saveAndRefresh();
+					}),
+			);
+		new Setting(containerEl)
+			.setName("縦書き時にメタデータ（プロパティ）を非表示")
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			.setDesc(
+				"縦書きON時、ノート冒頭のプロパティ（tags等）を非表示にします。縦書きではレイアウトが崩れるため、デフォルトONです。",
+			)
+			.addToggle((t) =>
+				t
+					.setValue(this.plugin.settings.hideVerticalMetadata)
+					.onChange(async (v) => {
+						this.plugin.settings.hideVerticalMetadata = v;
 						await this.plugin.saveAndRefresh();
 					}),
 			);
@@ -957,6 +1196,7 @@ class NovelToolsSettingTab extends PluginSettingTab {
 // ===== Main plugin =====
 export default class JapaneseNovelTools extends Plugin {
 	settings: NovelToolsSettings = { ...DEFAULT_SETTINGS };
+	private updateStatusBar: () => void = () => {};
 
 	async onload() {
 		await this.loadData().then((data: unknown) => {
@@ -971,16 +1211,49 @@ export default class JapaneseNovelTools extends Plugin {
 		this.registerEditorExtension(makeViewPlugin(() => this.settings));
 		this.addSettingTab(new NovelToolsSettingTab(this.app, this));
 
+		// ===== ステータスバーボタン（縦書きトグル）=====
+		const statusBarItem = this.addStatusBarItem();
+		statusBarItem.addClass("novel-tools-vertical-toggle");
+		statusBarItem.setAttribute("aria-label", "縦書き / 横書きを切り替え（クリック）");
+		statusBarItem.setAttribute("data-tooltip-position", "top");
+
+		const updateStatusBar = () => {
+			const isVertical = this.settings.enableVerticalPreview;
+			statusBarItem.textContent = isVertical ? "⇅ 縦書き" : "⇅ 横書き";
+			statusBarItem.toggleClass("is-active", isVertical);
+		};
+		updateStatusBar();
+		this.updateStatusBar = updateStatusBar;
+
+		statusBarItem.addEventListener("click", async () => {
+			this.settings.enableVerticalPreview = !this.settings.enableVerticalPreview;
+			await this.saveAndRefresh();
+		});
+
+		// ===== コマンドパレット + ホットキー登録 =====
+		this.addCommand({
+			id: "toggle-vertical-preview",
+			name: "縦書き / 横書きを切り替える",
+			callback: async () => {
+				this.settings.enableVerticalPreview = !this.settings.enableVerticalPreview;
+				await this.saveAndRefresh();
+			},
+		});
+
 		// モード切替・ペイン切替時にレイアウトを再適用
+		// NOTE:
+		// 以前は layout-change で rerender(true) を叩いていましたが、
+		// rerender(true) はタイトル/プロパティが消える等の副作用が報告されており、
+		// さらに今回の「連続空行」問題の根本原因は
+		// 「セクション境界のみを見ていたこと」だったため、ここではレイアウト再適用だけ行います。
+		const refreshLayoutOnly = () => {
+			applyLayout(this.settings);
+		};
 		this.registerEvent(
-			this.app.workspace.on("layout-change", () => {
-				applyLayout(this.settings);
-			}),
+			this.app.workspace.on("layout-change", refreshLayoutOnly),
 		);
 		this.registerEvent(
-			this.app.workspace.on("active-leaf-change", () => {
-				applyLayout(this.settings);
-			}),
+			this.app.workspace.on("active-leaf-change", refreshLayoutOnly),
 		);
 
 		// 縦書き時のホイール操作を横スクロールに変換
@@ -1010,24 +1283,195 @@ export default class JapaneseNovelTools extends Plugin {
 			{ passive: false },
 		);
 
+		// PostProcessor: sortOrder を大きめにして他プラグインより後に実行
+		// 連続空行は「セクション境界」ではなく「セクション内の各ブロック開始行」を基準に
+		// padding で表現する（DOMにスペーサー要素を挿入しない）
 		this.registerMarkdownPostProcessor(
 			(el, ctx: MarkdownPostProcessorContext) => {
-				// 他プラグインのMarkdownPostProcessorがDOMを書き換えた後に実行して共存性を上げる
+				// CSSクラス付与（同期でOK）
+				const previewView = el.closest(".markdown-preview-view");
+				if (previewView instanceof HTMLElement) {
+					previewView.classList.toggle(
+						"novel-tools-softbreaks",
+						this.isSoftBreakTarget(ctx?.sourcePath),
+					);
+					previewView.classList.toggle(
+						"novel-tools-vertical",
+						this.settings.enableVerticalPreview,
+					);
+				}
+
+				// ===== 連続空行の保持（DOM非挿入 / ギャップ加算方式） =====
+				// Obsidianのプレビューはブロック単位で <div data-line="..."> を生成することが多い。
+				// 連続空行はMarkdown仕様で潰れるため、次ブロック開始行の直前にある空行数を数え、
+				// “余剰分(空行数-1)”を「現在ブロックの後ろギャップ」として追加する。
+				//
+				// 重要:
+				// - DOMにスペーサー要素は挿入しない（差し替えレンダリングで消えやすいため）
+				// - 行番号は data-line / data-sourcepos / getSectionInfo のいずれかから取得（環境差吸収）
+				// - 実際の空行カウントはファイル全体（cachedRead）をソースにする（座標系の揺れ対策）
+
+				const sourcePath = ctx?.sourcePath;
+				if (!sourcePath) {
+					// sourcePath が無いケースは極めて稀だが、その場合は諦める
+				} else {
+					const af = this.app.vault.getAbstractFileByPath(sourcePath);
+					if (af instanceof TFile) {
+						// ファイル全文を読み、行配列を作る（Obsidianのキャッシュを使うので比較的軽い）
+						// NOTE: modifyイベントでinvalidateするほどの仕組みは不要（この用途は軽い）なので都度読む。
+						// ただし同一レンダリング内の重複読みを避けたい場合は、将来Mapキャッシュ化してください。
+						const fileTextPromise = this.app.vault.cachedRead(af);
+
+						// 対象の「ブロックwrapper」を決める:
+						// - el が .markdown-preview-section 直下の div ならそれがwrapper（縦書き列もここ）
+						// - el が section 自体なら、その直下divを列挙して処理
+						const parentIsPreviewSection =
+							el.parentElement?.classList.contains(
+								"markdown-preview-section",
+							) ?? false;
+						const isWrapperDiv =
+							parentIsPreviewSection && el.tagName === "DIV";
+
+						const parseStartLine = (
+							node: HTMLElement,
+							fileLinesLen: number,
+						): number | null => {
+							// 1) data-line（0-basedが多いが環境差あり）
+							const dl = node.getAttribute("data-line");
+							if (dl) {
+								const raw = Number(dl);
+								if (Number.isFinite(raw)) {
+									const cand = [raw, raw - 1];
+									for (const v of cand)
+										if (v >= 0 && v < fileLinesLen)
+											return v;
+								}
+							}
+							// 2) data-sourcepos（"12:1-14:10" のように 1-based が多い）
+							const dsp = node.getAttribute("data-sourcepos");
+							if (dsp) {
+								const m = dsp.match(/^(\d+)\s*:/);
+								if (m) {
+									const raw = Number(m[1]);
+									if (Number.isFinite(raw)) {
+										const cand = [raw - 1, raw];
+										for (const v of cand)
+											if (v >= 0 && v < fileLinesLen)
+												return v;
+									}
+								}
+							}
+							// 3) getSectionInfo の lineStart（0/1-based揺れ吸収）
+							const info = ctx.getSectionInfo(node);
+							if (info) {
+								const raw = info.lineStart;
+								const cand = [raw, raw - 1];
+								for (const v of cand)
+									if (v >= 0 && v < fileLinesLen) return v;
+							}
+							return null;
+						};
+
+						const countBlankLinesAbove = (
+							lines: string[],
+							startLine: number,
+						): number => {
+							let c = 0;
+							for (let i = startLine - 1; i >= 0; i--) {
+								if ((lines[i] ?? "").trim() === "") c++;
+								else break;
+							}
+							return c;
+						};
+
+						const applyGap = (node: HTMLElement, extra: number) => {
+							// まず解除（安全）
+							node.classList.remove("novel-tools-blankpad");
+							node.style.removeProperty(
+								"--novel-tools-extra-blank-lines",
+							);
+							node.removeAttribute("data-nt-blank");
+
+							if (extra <= 0) return;
+							const maxExtra = 50;
+							const e = Math.min(extra, maxExtra);
+
+							node.classList.add("novel-tools-blankpad");
+							node.style.setProperty(
+								"--novel-tools-extra-blank-lines",
+								String(e),
+							);
+
+							if (this.settings.enableDebugBorderPreview) {
+								node.setAttribute("data-nt-blank", String(e));
+							}
+						};
+
+						// 実処理（async）
+						fileTextPromise.then((fileText) => {
+							const lines = fileText.split(/\r?\n/);
+
+							// ★重要：縦書きは .markdown-preview-section > div を「列」として並べ、
+							// 列間隔は margin-right（物理）で表現している。
+							// vertical-rl の折返しでは margin-right は「次の列の手前」に効くため、
+							// “連続空行”は「次ブロックの手前」に入れるのが正しい。
+							// → 各 wrapper(div) 自身の開始行を基準に、直前の空行数を数えて、その wrapper に付与する。
+
+							if (isWrapperDiv) {
+								applyGap(el, 0);
+								const start = parseStartLine(el, lines.length);
+								if (start === null) return;
+								const blankCount = countBlankLinesAbove(
+									lines,
+									start,
+								);
+								const extra = Math.max(0, blankCount - 1);
+								applyGap(el, extra);
+								return;
+							}
+
+							// section要素: 直下div（列wrapper）を列挙してそれぞれに適用
+							const section = el.classList.contains(
+								"markdown-preview-section",
+							)
+								? el
+								: el.closest(".markdown-preview-section");
+
+							if (!(section instanceof HTMLElement)) return;
+
+							const children = Array.from(
+								section.children,
+							).filter(
+								(n): n is HTMLElement =>
+									n instanceof HTMLElement &&
+									n.tagName === "DIV",
+							);
+
+							if (children.length === 0) return;
+
+							// まず全解除
+							for (const c of children) applyGap(c, 0);
+
+							for (const c of children) {
+								const start = parseStartLine(c, lines.length);
+								if (start === null) continue;
+								const blankCount = countBlankLinesAbove(
+									lines,
+									start,
+								);
+								const extra = Math.max(0, blankCount - 1);
+								applyGap(c, extra);
+							}
+						});
+					}
+				}
+				// ハイライト処理は他プラグインのDOM操作後に実行するためsetTimeoutを維持
 				window.setTimeout(() => {
 					if (!el.isConnected) return;
-
-					// プレビュー改行（小説モード）: CSSクラスを付与して white-space を切替
-					const previewView = el.closest(".markdown-preview-view");
-					if (previewView instanceof HTMLElement) {
-						previewView.classList.toggle(
-							"novel-tools-softbreaks",
-							this.isSoftBreakTarget(ctx?.sourcePath),
-						);
-					}
-
 					processPreviewElement(el, this.settings);
 				}, 0);
 			},
+			10000,
 		);
 	}
 
@@ -1054,6 +1498,7 @@ export default class JapaneseNovelTools extends Plugin {
 		await this.saveData(this.settings);
 		applyColors(this.settings);
 		applyLayout(this.settings);
+		this.updateStatusBar();
 
 		// エディタ再描画
 		this.app.workspace.iterateAllLeaves((leaf) => {

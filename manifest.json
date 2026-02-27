@@ -1,9 +1,11 @@
 {
 	"id": "japanese-novel-tools",
 	"name": "Japanese Novel Tools",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "Syntax highlighting and control character visualization for Japanese novel writing.",
 	"author": "satoshikokubo",
+	"authorUrl": "https://github.com/satoshikokubo",
+	"fundingUrl": "https://buymeacoffee.com/kokubox",
 	"isDesktopOnly": false
 }

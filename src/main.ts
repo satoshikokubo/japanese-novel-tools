@@ -26,12 +26,12 @@ const DEFAULT_SETTINGS = {
 	enableRuby: true,
 	enableParen: true,
 	// 追加ハイライト記号
-	enableKakko3: true,   // 【】
-	enableKakko4: true,   // 〔〕
-	enableKakko5: true,   // 〈〉
-	enableKakko6: true,   // "" / “”（ダブルクォート）
-	enableKakko7: true,   // ［］/ []
-	enableKakko8: true,   // '' / ‘’（シングルクォート）
+	enableKakko3: true, // 【】
+	enableKakko4: true, // 〔〕
+	enableKakko5: true, // 〈〉
+	enableKakko6: true, // "" / “”（ダブルクォート）
+	enableKakko7: true, // ［］/ []
+	enableKakko8: true, // '' / ‘’（シングルクォート）
 	colorKakko1: "#7ab87a",
 	colorKakko2: "#a8c87a",
 	colorRuby: "#7aaec8",
@@ -698,8 +698,7 @@ function processPreviewElement(el: HTMLElement, settings: NovelToolsSettings) {
 
 				// 既に自前spanの中（理論上はunwrap済みだが保険）
 				const parent = (node as Text).parentElement;
-				if (parent?.closest(KAKKO_SPAN_SEL + ", code, pre"))
-					return;
+				if (parent?.closest(KAKKO_SPAN_SEL + ", code, pre")) return;
 
 				units.push({
 					kind: "text",
@@ -953,7 +952,7 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			["enableKakko3", "【】のハイライト"],
 			["enableKakko4", "〔〕のハイライト"],
 			["enableKakko5", "〈〉のハイライト"],
-			["enableKakko6", "\"\" / “” ダブルクォートのハイライト"],
+			["enableKakko6", '"" / “” ダブルクォートのハイライト'],
 			["enableKakko7", "［］/ [] 角括弧のハイライト"],
 			["enableKakko8", "''  / ‘’ シングルクォートのハイライト"],
 		];
@@ -989,7 +988,7 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			["colorKakko3", "【】の色"],
 			["colorKakko4", "〔〕の色"],
 			["colorKakko5", "〈〉の色"],
-			["colorKakko6", "\"\" / “” ダブルクォートの色"],
+			["colorKakko6", '"" / “” ダブルクォートの色'],
 			["colorKakko7", "［］/ [] 角括弧の色"],
 			["colorKakko8", "''  / ‘’ シングルクォートの色"],
 			["colorControl", "制御文字（全角スペース/改行）の色"],
@@ -1059,9 +1058,9 @@ class NovelToolsSettingTab extends PluginSettingTab {
 					}),
 			);
 		new Setting(containerEl)
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setName("縦書き時の列間（em）")
 			.setDesc(
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				"縦書きON時のみ使用されます。段落間（列と列の間）の広さを調整します。テーマによって見え方が異なります。",
 			)
 			.addSlider((s) =>
@@ -1075,9 +1074,9 @@ class NovelToolsSettingTab extends PluginSettingTab {
 					}),
 			);
 		new Setting(containerEl)
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setName("縦書き時にメタデータ（プロパティ）を非表示")
 			.setDesc(
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				"縦書きON時、ノート冒頭のプロパティ（tags等）を非表示にします。縦書きではレイアウトが崩れるため、デフォルトONです。",
 			)
 			.addToggle((t) =>
@@ -1214,7 +1213,10 @@ export default class JapaneseNovelTools extends Plugin {
 		// ===== ステータスバーボタン（縦書きトグル）=====
 		const statusBarItem = this.addStatusBarItem();
 		statusBarItem.addClass("novel-tools-vertical-toggle");
-		statusBarItem.setAttribute("aria-label", "縦書き / 横書きを切り替え（クリック）");
+		statusBarItem.setAttribute(
+			"aria-label",
+			"縦書き / 横書きを切り替え（クリック）",
+		);
 		statusBarItem.setAttribute("data-tooltip-position", "top");
 
 		const updateStatusBar = () => {
@@ -1227,7 +1229,8 @@ export default class JapaneseNovelTools extends Plugin {
 
 		statusBarItem.addEventListener("click", () => {
 			void (async () => {
-				this.settings.enableVerticalPreview = !this.settings.enableVerticalPreview;
+				this.settings.enableVerticalPreview =
+					!this.settings.enableVerticalPreview;
 				await this.saveAndRefresh();
 			})();
 		});
@@ -1237,7 +1240,8 @@ export default class JapaneseNovelTools extends Plugin {
 			id: "toggle-vertical-preview",
 			name: "縦書き / 横書きを切り替える",
 			callback: async () => {
-				this.settings.enableVerticalPreview = !this.settings.enableVerticalPreview;
+				this.settings.enableVerticalPreview =
+					!this.settings.enableVerticalPreview;
 				await this.saveAndRefresh();
 			},
 		});

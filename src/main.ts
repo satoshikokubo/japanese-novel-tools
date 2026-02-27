@@ -1059,6 +1059,7 @@ class NovelToolsSettingTab extends PluginSettingTab {
 					}),
 			);
 		new Setting(containerEl)
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setName("縦書き時の列間（em）")
 			.setDesc(
 				"縦書きON時のみ使用されます。段落間（列と列の間）の広さを調整します。テーマによって見え方が異なります。",
@@ -1074,6 +1075,7 @@ class NovelToolsSettingTab extends PluginSettingTab {
 					}),
 			);
 		new Setting(containerEl)
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setName("縦書き時にメタデータ（プロパティ）を非表示")
 			.setDesc(
 				"縦書きON時、ノート冒頭のプロパティ（tags等）を非表示にします。縦書きではレイアウトが崩れるため、デフォルトONです。",

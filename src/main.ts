@@ -377,191 +377,35 @@ function makeViewPlugin(getSettings: () => NovelToolsSettings) {
 }
 
 // ===== Style injection =====
+// Dynamic values are applied via CSS custom properties on document.body.
+// All CSS rules are defined in styles.css, which Obsidian loads automatically.
 function applyColors(settings: NovelToolsSettings) {
-	const id = "novel-tools-dynamic-styles";
-	let el = document.getElementById(id) as HTMLStyleElement | null;
-	if (!el) {
-		el = document.head.createEl("style");
-		el.id = id;
-	}
-	el.textContent = `
-		.novel-tools-kakko1 { color: ${settings.colorKakko1} !important; }
-		.novel-tools-kakko2 { color: ${settings.colorKakko2} !important; }
-		.novel-tools-ruby   { color: ${settings.colorRuby}   !important; }
-		.novel-tools-paren  { color: ${settings.colorParen}  !important; }
-		.novel-tools-kakko3 { color: ${settings.colorKakko3} !important; }
-		.novel-tools-kakko4 { color: ${settings.colorKakko4} !important; }
-		.novel-tools-kakko5 { color: ${settings.colorKakko5} !important; }
-		.novel-tools-kakko6 { color: ${settings.colorKakko6} !important; }
-		.novel-tools-kakko7 { color: ${settings.colorKakko7} !important; }
-		.novel-tools-kakko8 { color: ${settings.colorKakko8} !important; }
-		.novel-tools-fullwidth-space { color: ${settings.colorControl} !important; opacity: 0.35; font-size: 0.8em; }
-		.novel-tools-newline         { color: ${settings.colorControl} !important; opacity: 0.35; font-size: 0.8em; }
-	`;
+	const body = document.body;
+	body.style.setProperty("--novel-tools-kakko1", settings.colorKakko1);
+	body.style.setProperty("--novel-tools-kakko2", settings.colorKakko2);
+	body.style.setProperty("--novel-tools-ruby",   settings.colorRuby);
+	body.style.setProperty("--novel-tools-paren",  settings.colorParen);
+	body.style.setProperty("--novel-tools-kakko3", settings.colorKakko3);
+	body.style.setProperty("--novel-tools-kakko4", settings.colorKakko4);
+	body.style.setProperty("--novel-tools-kakko5", settings.colorKakko5);
+	body.style.setProperty("--novel-tools-kakko6", settings.colorKakko6);
+	body.style.setProperty("--novel-tools-kakko7", settings.colorKakko7);
+	body.style.setProperty("--novel-tools-kakko8", settings.colorKakko8);
+	body.style.setProperty("--novel-tools-control", settings.colorControl);
 }
 
 function applyLayout(settings: NovelToolsSettings) {
-	const id = "novel-tools-layout-styles";
-	let el = document.getElementById(id) as HTMLStyleElement | null;
-	if (!el) {
-		el = document.head.createEl("style");
-		el.id = id;
-	}
-
-	const css: string[] = [];
-
-	// デバッグ枠（編集・プレビュー独立）
-	if (settings.enableDebugBorderEditor) {
-		css.push(`
-			.workspace-leaf-content .cm-editor { outline: 3px solid green !important; }
-			.workspace-leaf-content .cm-scroller { outline: 3px solid orange !important; }
-		`);
-	}
-	if (settings.enableDebugBorderPreview) {
-		css.push(`
-			.workspace-leaf-content[data-type="markdown"] .markdown-preview-view {
-				outline: 3px solid red !important;
-			}
-			.workspace-leaf-content[data-type="markdown"] .markdown-preview-section {
-				outline: 3px dashed blue !important;
-			}
-			.workspace-leaf-content[data-type="markdown"] .markdown-preview-sizer {
-				outline: 3px dotted purple !important;
-			}
-		`);
-	}
-
-	// ===== 編集画面（横書き横幅のみ）=====
-	// .cm-editorに限定してbodyを汚染しない
-	css.push(
-		`.cm-editor { --file-line-width: ${settings.editorLineWidth}px; }`,
-	);
-
-	// ===== プレビュー画面 =====
-	if (settings.enableVerticalPreview) {
-		// プレビュー：縦書き
-		// --file-line-width / --line-width を auto にリセットしないと、
-		// Minimal等のテーマで列間が異常に広くなる問題が発生する。
-		css.push(`
-			.markdown-preview-view {
-				writing-mode: vertical-rl !important;
-				text-orientation: upright !important;
-				height: ${settings.previewVerticalHeight}vh !important;
-				overflow-x: auto !important;
-				overflow-y: hidden !important;
-				padding: 16px !important;
-				box-sizing: border-box !important;
-				max-width: none !important;
-				--file-line-width: auto !important;
-				--line-width: auto !important;
-				word-break: break-all !important;
-				font-feature-settings: "vert" !important;
-
-			}
-			.markdown-preview-sizer {
-				min-height: unset !important;
-				padding-bottom: 0 !important;
-				height: 100% !important;
-			}
-			.markdown-preview-section {
-				max-width: none !important;
-				height: 100% !important;
-			}
-			.markdown-preview-section > div {
-				display: inline-block !important;
-				height: 100% !important;
-				margin: 0 !important;
-				margin-right: ${settings.verticalColumnGap}em !important;
-				vertical-align: top !important;
-			}
-			/* テーマの段落スペーシングを縦書き用にリセット（--p-spacing が列間に化けるのを防ぐ） */
-			.markdown-preview-view {
-				--p-spacing: 0px !important;
-			}
-			.markdown-preview-view p,
-			.markdown-preview-view h1,
-			.markdown-preview-view h2,
-			.markdown-preview-view h3,
-			.markdown-preview-view h4,
-			.markdown-preview-view h5,
-			.markdown-preview-view h6 {
-				margin-block: 0 !important;
-			}
-		`);
-		// メタデータ非表示オプション
-		if (settings.hideVerticalMetadata) {
-			css.push(`
-				.markdown-preview-view .metadata-container {
-					display: none !important;
-				}
-			`);
-		}
-	} else {
-		// プレビュー：横書き幅（.markdown-preview-viewに限定）
-		css.push(
-			`.markdown-preview-view { --file-line-width: ${settings.previewLineWidth}px; }`,
-		);
-	}
-
-	// ===== プレビュー改行（小説モード）=====
-	// markdown-it の softbreak は DOM 上では "\\n" になることが多く、通常は空白として折り畳まれる。
-	// white-space: pre-line にすることで、原文を汚さずプレビュー表示だけで改行を可視化できる。
-	css.push(`
-		.markdown-preview-view.novel-tools-softbreaks p {
-			white-space: pre-line !important;
-		}
-	`);
-
-	// ===== 連続空行の保持（DOM非挿入 / ギャップ加算方式） =====
-	// Markdownの仕様で「連続空行」は1つに潰れるため、プレビュー側で“余剰分(空行数-1)”だけ
-	// ブロック間ギャップを追加して再現する。
-	//
-	// 単位は行間調整と競合しにくいよう可能なら 1lh を採用（未対応環境は 1em）。
-	// - 横書き: wrapper(div) に margin-block-end を追加
-	// - 縦書き: .markdown-preview-section > div の列間(margin-right)に加算
-	css.push(`
-		.markdown-preview-view { --novel-tools-blank-unit: 1em; }
-		@supports (height: 1lh) {
-			.markdown-preview-view { --novel-tools-blank-unit: 1lh; }
-		}
-			/* 横書きは「次ブロックの手前」に空行を入れるため、padding-block-start を使う */
-			.markdown-preview-view:not(.novel-tools-vertical) .novel-tools-blankpad {
-				padding-block-start: calc(var(--novel-tools-extra-blank-lines, 0) * var(--novel-tools-blank-unit)) !important;
-			}
-		/* 縦書きは「列(div)」の間隔で表現する（空白列をDOM挿入せずに再現） */
-		.markdown-preview-view.novel-tools-vertical .markdown-preview-section > div.novel-tools-blankpad {
-			margin-right: calc(${settings.verticalColumnGap}em + (var(--novel-tools-extra-blank-lines, 0) * var(--novel-tools-blank-unit))) !important;
-		}
-	`);
-	// ===== ステータスバーボタン =====
-	css.push(`
-		.novel-tools-vertical-toggle {
-			cursor: pointer;
-			padding: 0 6px;
-			border-radius: 4px;
-			border: 1px solid transparent;
-			transition: border-color 0.15s, color 0.15s;
-			user-select: none;
-		}
-		.novel-tools-vertical-toggle:hover {
-			border-color: var(--text-muted);
-			background: var(--background-modifier-hover);
-		}
-		.novel-tools-vertical-toggle.is-active {
-			color: var(--color-accent);
-			border-color: var(--color-accent);
-			font-weight: 600;
-		}
-	`);
-
-	// ===== 設定画面：無効項目の視認性 =====
-	css.push(`
-		.novel-tools-setting-disabled { opacity: 0.55; }
-		.novel-tools-setting-disabled .setting-item-description { opacity: 0.85; }
-		.novel-tools-setting-disabled .setting-item-control { opacity: 0.65; }
-	`);
-
-	el.textContent = css.join("\n");
+	// Dynamic numeric values are passed via CSS custom properties on document.body.
+	// Boolean conditions are applied via body class toggles.
+	// All CSS rules referencing these properties/classes are defined in styles.css.
+	const body = document.body;
+	body.style.setProperty("--novel-tools-editor-width",   settings.editorLineWidth + "px");
+	body.style.setProperty("--novel-tools-preview-height", settings.previewVerticalHeight + "vh");
+	body.style.setProperty("--novel-tools-preview-width",  settings.previewLineWidth + "px");
+	body.style.setProperty("--novel-tools-column-gap",     settings.verticalColumnGap + "em");
+	body.classList.toggle("novel-tools-debug-editor",  settings.enableDebugBorderEditor);
+	body.classList.toggle("novel-tools-debug-preview", settings.enableDebugBorderPreview);
+	body.classList.toggle("novel-tools-hide-metadata", settings.hideVerticalMetadata);
 }
 
 // ===== ① 連続空行の保持（プレビューのみ / padding方式） =====

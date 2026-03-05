@@ -1,3 +1,4 @@
+/* ===== Control character visualization ===== */
 .novel-tools-fullwidth-space {
 	opacity: 0.35;
 	font-size: 0.8em;
@@ -5,4 +6,139 @@
 .novel-tools-newline {
 	opacity: 0.35;
 	font-size: 0.8em;
+}
+
+/* ===== Syntax highlight colors (set via CSS custom properties) ===== */
+.novel-tools-kakko1 { color: var(--novel-tools-kakko1, #4caf50) !important; }
+.novel-tools-kakko2 { color: var(--novel-tools-kakko2, #8bc34a) !important; }
+.novel-tools-ruby   { color: var(--novel-tools-ruby,   #2196f3) !important; }
+.novel-tools-paren  { color: var(--novel-tools-paren,  #f44336) !important; }
+.novel-tools-kakko3 { color: var(--novel-tools-kakko3, #ff9800) !important; }
+.novel-tools-kakko4 { color: var(--novel-tools-kakko4, #9c27b0) !important; }
+.novel-tools-kakko5 { color: var(--novel-tools-kakko5, #00bcd4) !important; }
+.novel-tools-kakko6 { color: var(--novel-tools-kakko6, #ffeb3b) !important; }
+.novel-tools-kakko7 { color: var(--novel-tools-kakko7, #ff5722) !important; }
+.novel-tools-kakko8 { color: var(--novel-tools-kakko8, #cddc39) !important; }
+.novel-tools-fullwidth-space,
+.novel-tools-newline {
+	color: var(--novel-tools-control, #888888) !important;
+}
+
+/* ===== Editor line width ===== */
+.cm-editor {
+	--file-line-width: var(--novel-tools-editor-width, 700px);
+}
+
+/* ===== Preview: vertical writing mode ===== */
+.markdown-preview-view.novel-tools-vertical {
+	writing-mode: vertical-rl !important;
+	text-orientation: upright !important;
+	height: var(--novel-tools-preview-height, 70vh) !important;
+	overflow-x: auto !important;
+	overflow-y: hidden !important;
+	padding: 16px !important;
+	box-sizing: border-box !important;
+	max-width: none !important;
+	--file-line-width: auto !important;
+	--line-width: auto !important;
+	--p-spacing: 0px !important;
+	word-break: break-all !important;
+	font-feature-settings: "vert" !important;
+}
+.markdown-preview-view.novel-tools-vertical .markdown-preview-sizer {
+	min-height: unset !important;
+	padding-bottom: 0 !important;
+	height: 100% !important;
+}
+.markdown-preview-view.novel-tools-vertical .markdown-preview-section {
+	max-width: none !important;
+	height: 100% !important;
+}
+.markdown-preview-view.novel-tools-vertical .markdown-preview-section > div {
+	display: inline-block !important;
+	height: 100% !important;
+	margin: 0 !important;
+	margin-right: var(--novel-tools-column-gap, 1.5em) !important;
+	vertical-align: top !important;
+}
+.markdown-preview-view.novel-tools-vertical p,
+.markdown-preview-view.novel-tools-vertical h1,
+.markdown-preview-view.novel-tools-vertical h2,
+.markdown-preview-view.novel-tools-vertical h3,
+.markdown-preview-view.novel-tools-vertical h4,
+.markdown-preview-view.novel-tools-vertical h5,
+.markdown-preview-view.novel-tools-vertical h6 {
+	margin-block: 0 !important;
+}
+
+/* ===== Preview: hide metadata in vertical mode ===== */
+body.novel-tools-hide-metadata .markdown-preview-view.novel-tools-vertical .metadata-container {
+	display: none !important;
+}
+
+/* ===== Preview: horizontal line width ===== */
+.markdown-preview-view:not(.novel-tools-vertical) {
+	--file-line-width: var(--novel-tools-preview-width, 700px);
+}
+
+/* ===== Preview: soft line breaks (novel mode) ===== */
+.markdown-preview-view.novel-tools-softbreaks p {
+	white-space: pre-line !important;
+}
+
+/* ===== Blank line preservation ===== */
+.markdown-preview-view {
+	--novel-tools-blank-unit: 1em;
+}
+@supports (height: 1lh) {
+	.markdown-preview-view {
+		--novel-tools-blank-unit: 1lh;
+	}
+}
+.markdown-preview-view:not(.novel-tools-vertical) .novel-tools-blankpad {
+	padding-block-start: calc(var(--novel-tools-extra-blank-lines, 0) * var(--novel-tools-blank-unit)) !important;
+}
+.markdown-preview-view.novel-tools-vertical .markdown-preview-section > div.novel-tools-blankpad {
+	margin-right: calc(var(--novel-tools-column-gap, 1.5em) + (var(--novel-tools-extra-blank-lines, 0) * var(--novel-tools-blank-unit))) !important;
+}
+
+/* ===== Status bar button ===== */
+.novel-tools-vertical-toggle {
+	cursor: pointer;
+	padding: 0 6px;
+	border-radius: 4px;
+	border: 1px solid transparent;
+	transition: border-color 0.15s, color 0.15s;
+	user-select: none;
+}
+.novel-tools-vertical-toggle:hover {
+	border-color: var(--text-muted);
+	background: var(--background-modifier-hover);
+}
+.novel-tools-vertical-toggle.is-active {
+	color: var(--color-accent);
+	border-color: var(--color-accent);
+	font-weight: 600;
+}
+
+/* ===== Settings: disabled item visibility ===== */
+.novel-tools-setting-disabled { opacity: 0.55; }
+.novel-tools-setting-disabled .setting-item-description { opacity: 0.85; }
+.novel-tools-setting-disabled .setting-item-control { opacity: 0.65; }
+
+/* ===== Debug borders ===== */
+body.novel-tools-debug-editor .workspace-leaf-content .cm-editor {
+	outline: 3px solid green !important;
+}
+body.novel-tools-debug-editor .workspace-leaf-content .cm-scroller {
+	outline: 3px solid orange !important;
+}
+body.novel-tools-debug-preview .workspace-leaf-content[data-type="markdown"] .markdown-preview-view {
+	outline: 3px solid red !important;
+}
+body.novel-tools-debug-preview .workspace-leaf-content[data-type="markdown"] .markdown-preview-section {
+	outline: 3px dashed blue !important;
+}
+body.novel-tools-debug-preview .workspace-leaf-content[data-type="markdown"] .markdown-preview-sizer {
+	outline: 3px dotted purple !important;
 }

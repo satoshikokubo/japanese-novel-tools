@@ -22,6 +22,14 @@ export default tseslint.config(
 		},
 	},
 	...obsidianmd.configs.recommended,
+	{
+		// The sentence-case rule is disabled because this plugin's UI text
+		// is written in Japanese, where English sentence-case conventions
+		// do not apply. Japanese strings are exempt from this rule.
+		rules: {
+			"obsidianmd/ui/sentence-case": "off",
+		},
+	},
 	globalIgnores([
 		"node_modules",
 		"dist",

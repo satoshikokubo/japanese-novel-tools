@@ -381,10 +381,8 @@ function applyColors(settings: NovelToolsSettings) {
 	const id = "novel-tools-dynamic-styles";
 	let el = document.getElementById(id) as HTMLStyleElement | null;
 	if (!el) {
-		// eslint-disable-next-line obsidianmd/no-forbidden-elements
-		el = document.createElement("style");
+		el = document.head.createEl("style");
 		el.id = id;
-		document.head.appendChild(el);
 	}
 	el.textContent = `
 		.novel-tools-kakko1 { color: ${settings.colorKakko1} !important; }
@@ -406,10 +404,8 @@ function applyLayout(settings: NovelToolsSettings) {
 	const id = "novel-tools-layout-styles";
 	let el = document.getElementById(id) as HTMLStyleElement | null;
 	if (!el) {
-		// eslint-disable-next-line obsidianmd/no-forbidden-elements
-		el = document.createElement("style");
+		el = document.head.createEl("style");
 		el.id = id;
-		document.head.appendChild(el);
 	}
 
 	const css: string[] = [];
@@ -1031,7 +1027,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 		);
 		new Setting(containerEl)
 			.setName("縦書き時の高さ（vh）")
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc("縦書きON時のみ使用されます。50〜90推奨。")
 			.addSlider((s) =>
 				s
@@ -1045,7 +1040,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 			);
 		new Setting(containerEl)
 			.setName("横書き時の表示幅（px）")
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			.setDesc("横書きON時のみ使用されます。")
 			.addSlider((s) =>
 				s
@@ -1060,7 +1054,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("縦書き時の列間（em）")
 			.setDesc(
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				"縦書きON時のみ使用されます。段落間（列と列の間）の広さを調整します。テーマによって見え方が異なります。",
 			)
 			.addSlider((s) =>
@@ -1076,7 +1069,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("縦書き時にメタデータ（プロパティ）を非表示")
 			.setDesc(
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				"縦書きON時、ノート冒頭のプロパティ（tags等）を非表示にします。縦書きではレイアウトが崩れるため、デフォルトONです。",
 			)
 			.addToggle((t) =>
@@ -1101,7 +1093,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 		const previewSoftbreakSetting = new Setting(containerEl)
 			.setName("プレビューで1回改行を維持（小説モード）")
 			.setDesc(
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				"Obsidian設定「厳密な改行」がONのまま、小説ノートだけEnter1回の改行をプレビューでも維持したい場合に使います。Obsidian側がOFFの場合は不要（重複防止のため自動的に適用されません）。原文は変更しません。",
 			)
 			.addToggle((t) =>
@@ -1123,7 +1114,6 @@ class NovelToolsSettingTab extends PluginSettingTab {
 		const previewSoftbreakPathSetting = new Setting(containerEl)
 			.setName("小説モード改行の適用対象（パス先頭一致）")
 			.setDesc(
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				"空欄なら全ノートに適用。例: Novel/ など。（Obsidianの「厳密な改行」がONのときのみ有効）",
 			)
 			.addText((t) =>
